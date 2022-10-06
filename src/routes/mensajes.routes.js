@@ -8,7 +8,12 @@ let MENSAJES;
 
 routerMensajes.get( "/", async (req, res) => {
     MENSAJES = await ApiMensajes.getAll();
-    req.io.emit('from-server-mensajes', {MENSAJES});
+    if(!MENSAJES){
+        return res.status(404).json({ error });
+    }else{
+        return res.status(200).render('vista', {MENSAJES});
+    }
+    
 })
 
 routerMensajes.post( "/mensajes", async (req, res) => {

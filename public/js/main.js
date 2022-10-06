@@ -31,6 +31,8 @@ function habilitarButton(){
   });
   
   function renderMensaje(mensajesNorm) {
+    let normalData = new normalizr.denormalize(mensajesNorm.result, mensajesNorm.mesagges, mensajesNorm.entities);
+    console.log(normalData);
     const cuerpoMensajesHTML = mensajesNorm.map( msj =>{
         return `<div class="col-12 cont">
                   <b class="colorBlue">${msj.author[0].email}</b>
