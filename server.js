@@ -1,9 +1,11 @@
 import * as dotenv from 'dotenv'
 
 import express, { urlencoded } from "express";
+import { normalize, schema } from 'normalizr';
 
 import { Server as HttpServer } from 'http';
 import { Server as IOServer } from 'socket.io';
+import MensajesDaos from './src/daos/mensajes/MensajesDaosMongodb.js';
 import { engine } from 'express-handlebars';
 import { join } from "path";
 import routerMensajes from "./src/routes/mensajes.routes.js";
@@ -14,6 +16,19 @@ dotenv.config();
 
 const httpServer = new HttpServer(app);
 const io = new IOServer(httpServer);
+
+const ApiMensajes = new MensajesDaos('MENSAJES');
+let MENSAJES;
+
+const authorSchema = new schema.Entity('authors', {}, {idAttribute: 'email'});
+
+const mensajeSchema = new schema.Entity('mensaje', {
+    author: authorSchema
+}, {idAttribute: '_id'});
+
+const dataSchema = new schema.Entity('data',{
+    data: [mensajeSchema]
+}, {idAttribute: 'id'});
 
 // /*-------------------Middleware-------------------------*/
 app.use(urlencoded({ extended: true}));
@@ -55,10 +70,13 @@ app.use((error, req, res, next) => {
    });
 
    /* ---------------------- WebSocket ----------------------*/
-io.on('connection', (socket)=>{
-
+io.on('connection', async (socket)=>{
+    MENSAJES= await ApiMensajes.getAll();
+    const data = {id: 999, MENSAJES };
+    const normalizedData = normalize(data, dataSchema);
     console.log(`Nuevo cliente conectado! ${socket.id}`);
     
+    socket.emit('from-server-mensajes', normalizedData);
   });
   
 /* ---------------------- Servidor ----------------------*/

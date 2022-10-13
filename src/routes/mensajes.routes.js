@@ -4,6 +4,7 @@ import express from "express";
 const routerMensajes = express.Router();
 
 const ApiMensajes = new MensajesDaos('MENSAJES');
+
 let MENSAJES;
 
 routerMensajes.get( "/", async (req, res) => {
@@ -13,7 +14,6 @@ routerMensajes.get( "/", async (req, res) => {
     }else{
         return res.status(200).render('vista', {MENSAJES});
     }
-    
 })
 
 routerMensajes.post( "/mensajes", async (req, res) => {
@@ -23,5 +23,7 @@ routerMensajes.post( "/mensajes", async (req, res) => {
     res.redirect('/');
 
 });
+
+
 
 export default routerMensajes;

@@ -24,9 +24,7 @@ class Mensajes{
     async getAll(){
         try {
             await mongoose.connect(strConn);
-            objs = await mensajesModel.find({}).lean();
-            const data = {id: 999, mensajes:objs };
-            const normalizedData = normalize(data, dataSchema);
+            objs = await mensajesModel.find().lean();
             return objs;
            
           } catch (error) {
@@ -38,7 +36,7 @@ class Mensajes{
     async insertar(datos){
         try {
             await mongoose.connect(strConn);
-            objs = await mensajesModel.find().lean();
+            objs = await mensajesModel.find();
             datos = {
                 author:{
                     email: datos.email,

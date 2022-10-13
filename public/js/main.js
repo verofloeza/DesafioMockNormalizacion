@@ -1,8 +1,14 @@
 const socket = io();
 
-socket.on('from-server-saludo', data => {
-  alert(data);
-});
+const authorSchema = new normalizr.schema.Entity('authors', {}, {idAttribute: 'email'});
+
+const mensajeSchema = new normalizr.schema.Entity('mensaje', {
+    author: authorSchema
+}, {idAttribute: '_id'});
+
+const dataSchema = new normalizr.schema.Entity('data',{
+    data: [mensajeSchema]
+}, {idAttribute: 'id'});
 
 function habilitarButton(){
 
@@ -22,23 +28,26 @@ function habilitarButton(){
     document.getElementById(inputName+"Mensaje").value = document.querySelector('#'+inputName).value;
   }
   
-
-
   socket.on('from-server-mensajes', data => {
-    alert(data.MENSAJES)
-    //renderMensaje(data.MENSAJES);
+    let normalData = normalizr.denormalize(data.result, dataSchema, data.entities);
+    renderMensaje(normalData.MENSAJES);
+
+    const longO = JSON.stringify(normalData).length
+    const longN = JSON.stringify(data).length;
+    const porcentaje = ((longN*100)/longO).toFixed(2)
+    document.querySelector('#porcentaje').innerHTML = porcentaje;
     
   });
+
   
   function renderMensaje(mensajesNorm) {
-    let normalData = new normalizr.denormalize(mensajesNorm.result, mensajesNorm.mesagges, mensajesNorm.entities);
-    console.log(normalData);
+    
     const cuerpoMensajesHTML = mensajesNorm.map( msj =>{
         return `<div class="col-12 cont">
-                  <b class="colorBlue">${msj.author[0].email}</b>
+                  <b class="colorBlue">${msj.author.email}</b>
                   <p class="colorBrown">[${msj.timestamp}]:</p> 
                   <span class="textMessage">${msj.text}</span>
-                  <img src="${author[0].avatar}" width="30">
+                  <img src="${msj.author.avatar}" width="30">
                 </div>
                 <br><br>`;
     }).join("");  
